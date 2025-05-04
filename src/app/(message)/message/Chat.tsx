@@ -10,78 +10,108 @@ function Chat({ user }: { user: IUser | undefined }) {
     Array<{ userId: string; socketId: string }>
   >([]);
   const [chat, setChat] = useState<string>("");
-  const [messages, setmessages] = useState<
+  const [messages, setMessages] = useState<
     Array<{ message: string; sender: string }>
   >([]);
   const { data, status } = useSession();
+
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const userRef = useRef<IUser | undefined>(user); // track the latest user
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const handleSubmit = () => {
+    const recipientId = user?._id?.toString();
+    const senderId = data?.user.id.toString();
+
+    if (!chat.trim() || !recipientId || !senderId) return;
+
     if (socketRef.current !== null) {
       socketRef.current.emit("message", {
         chat,
-        recieverId: user?._id?.toString(),
-        senderId: data?.user.id,
+        recieverId: recipientId,
+        senderId: senderId,
       });
     }
-    if(!messages){
-      setmessages([{message : chat , sender:data?.user?.id?.toString() ?? ""}])
-    }
-    else{
 
-      setmessages((prev) => [
-        ...prev,
-        { message: chat, sender: data?.user?.id?.toString() ?? "" },
-      ]);
-    }
+    setMessages((prev) => [
+      ...prev,
+      { message: chat, sender: senderId },
+    ]);
     setChat("");
   };
+
   useEffect(() => {
     const getMessages = async () => {
       const res = await fetch(
         `/api/message?senderId=${data?.user.id}&recieverId=${user?._id}`
       );
       const output = await res.json();
-      console.log(output);
-      setmessages(output.messages);
+      setMessages(output.messages || []);
     };
-    getMessages();
-  }, [user,data?.user.id]);
+
+    if (user?._id && data?.user.id) {
+      getMessages();
+    }
+  }, [user, data?.user.id]);
+
+  // keep userRef in sync
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
   useEffect(() => {
     if (status === "authenticated") {
       if (!socketRef.current) {
         const socket = getSocket(data.user.id.toString());
         socketRef.current = socket;
 
-        socket.on("onlineUsers", (online) => {
-          console.log(online);
-          setOnline(online);
+        socket.on("onlineUsers", (onlineList) => {
+          setOnline(onlineList);
         });
-        socket.on("message", ({chat,senderId}) => {
-          console.log(chat)
-          setmessages((prev) => [
-            ...prev,
-            { message: chat, sender:senderId},
-          ]);
-          
+
+        socket.on("message", ({ chat, senderId }) => {
+          // only show message if it matches current chat
+          if (senderId === userRef.current?._id?.toString()) {
+            setMessages((prev) => [
+              ...prev,
+              { message: chat, sender: senderId },
+            ]);
+          }
         });
-        
       }
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.off(); // clear all listeners
-          socketRef.current.disconnect(); // disconnect socket
-          socketRef.current = null; // reset socket reference
-        }
-      };
     }
-  }, [status,data]);
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off();
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [status, data?.user.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
-    <div className="border border-black min-h-screen w-[75%] my-4 mx-2 relative">
+    <div className="border border-black h-[calc(100vh-32px)] w-[75%] my-4 mx-2 flex flex-col">
       {user ? (
         <>
+          {/* Header */}
           <div className="bg-pink-500 h-14 flex items-center justify-between px-4 text-white">
             <div className="flex items-center gap-2">
-              <Image width={40} height={40} src={user.image} alt="" className="w-10 h-10 bg-cover" />
+              <Image
+                width={40}
+                height={40}
+                src={user.image}
+                alt=""
+                className="w-10 h-10 bg-cover"
+              />
               <h1>{user.username}</h1>
             </div>
             <p>
@@ -91,33 +121,36 @@ function Chat({ user }: { user: IUser | undefined }) {
                 : `Offline`}
             </p>
           </div>
-          <div className="flex flex-col gap-2 my-2">
-            {messages &&
-              messages.map((message) => (
-                <div
-                  key={message.sender + message.message + Math.random()}
-                  className={`max-w-96 flex ${
-                    message.sender === user._id?.toString()
-                      ? `self-start rounded-r-sm rounded-tl-sm  ml-2 bg-gray-500 `
-                      : `mr-2 bg-blue-500 self-end rounded-l-sm rounded-tr-sm`
-                  } my-2  p-4 `}
-                >
-                  {message.message}
-                </div>
-              ))}
+
+          {/* Scrollable Messages */}
+          <div className="flex-1 overflow-y-auto flex flex-col gap-2 px-2 py-2">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`max-w-96 flex ${
+                  message.sender === user._id?.toString()
+                    ? `self-start rounded-r-sm rounded-tl-sm ml-2 bg-gray-500`
+                    : `mr-2 bg-blue-500 self-end rounded-l-sm rounded-tr-sm`
+                } my-2 p-4`}
+              >
+                {message.message}
+              </div>
+            ))}
+            <div ref={messagesEndRef}></div>
           </div>
-          <div className="flex gap-2 w-[98%] ml-2">
+
+          {/* Sticky Input */}
+          <div className="bg-white p-2 border-t flex gap-2">
             <input
               value={chat}
               onChange={(e) => setChat(e.target.value)}
               type="text"
-              className="w-full bg-white border border-black rounded-sm"
+              className="w-full bg-white border border-black rounded-sm px-2"
+              placeholder="Type your message..."
             />
             <button
-              onClick={() => {
-                handleSubmit();
-              }}
-              className="btn bg-pink-400 border-pink-400 border"
+              onClick={handleSubmit}
+              className="btn bg-pink-400 border-pink-400 border px-4"
             >
               Send
             </button>

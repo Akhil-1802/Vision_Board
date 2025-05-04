@@ -45,15 +45,15 @@ function SideBar({ id }: { id: string }) {
           setOnlineUsers(online);
         });
       }
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.off(); // clear all listeners
-          socketRef.current.disconnect(); // disconnect socket
-          socketRef.current = null; // reset socket reference
-        }
-      };
     }
-  }, [status,data]);
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off(); // clear all listeners
+        socketRef.current.disconnect(); // disconnect socket
+        socketRef.current = null; // reset socket reference
+      }
+    };
+  }, [status,data?.user.id]);
   useEffect(() => {
     const getMyContacts = async () => {
       try {
@@ -74,7 +74,7 @@ function SideBar({ id }: { id: string }) {
     <>
       <Chat user={user} />
       <div className="border flex flex-col border-black my-4 w-[25%] mr-2">
-        <div className="flex justify-between items-center bg-pink-500 h-14 p-3 px-4">
+        <div className="flex justify-between items-center bg-pink-500 h-14 p-3 px-4 max-md:flex-col max-md:py-2">
           {searchBar ? (
             <>
               <input
@@ -142,7 +142,7 @@ function SideBar({ id }: { id: string }) {
             </>
           ) : (
             <>
-              <h1 className="  text-center font-bold text-white text-xl  ">
+              <h1 className="  text-center font-bold text-white text-xl max-sm:text-[15px] max-sm:text-sm ">
                 Messages
               </h1>
               <span
@@ -190,7 +190,7 @@ function SideBar({ id }: { id: string }) {
                 <div
                   className="cursor-pointer"
                   onClick={() => handleClick(user)}
-                  key={user._id?.toString()}
+                  key={user._id?.toString() + Math.random().toString()}
                 >
                   <div className="border-b-2 h-16 flex justify-between items-center px-2 my-2">
                     <div className="flex items-center gap-1">
@@ -224,7 +224,7 @@ function SideBar({ id }: { id: string }) {
           <div>
             {myUsers && myUsers.map((user: IUser) => (
               
-                <div onClick={() => handleClick(user)} key={user._id?.toString()} className="cursor-pointer border-b-2 h-16 flex justify-between items-center px-2 my-2">
+                <div onClick={() => handleClick(user)} key={user._id?.toString()} className="cursor-pointer border-b-2 h-16 flex justify-between items-center px-2 my-2 max-md:flex-col max-md:justify-center">
                   
                   <div className="flex items-center gap-1">
                     <Image
@@ -232,11 +232,11 @@ function SideBar({ id }: { id: string }) {
                     height={40}
                       src={user.image}
                       alt=""
-                      className="w-10 h-10 bg-cover"
+                      className="w-10 h-10 max-lg:w-8 max-lg:h-8  bg-cover max-sm:w-4 max-sm:h-4"
                     />
-                    <h1 className="text-xl">{user.username}</h1>
+                    <h1 className="font-semibold text-xl max-lg:text-[18px] max-md:text-[15px]">{user.username}</h1>
                   </div>
-                  <p>
+                  <p className="max-lg:text-[11px]">
                     {user._id &&
                     onlineUsers.some(
                       (onlineUser) => user._id?.toString() === onlineUser.userId

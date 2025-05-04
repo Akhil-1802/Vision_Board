@@ -60,12 +60,12 @@ export async function GET(req:NextRequest) {
                 senderId: recieverId,
                 recieverId:senderId
             })
-            return NextResponse.json({message : 'Chats',messages : chat.messages},{status : 200})
+            return NextResponse.json({message : 'Chats',messages : chat.messages || []},{status : 200})
         }
         if(!chat){
             return NextResponse.json({message :'Chats not found',messages : []},{status:200})
         }
-        return NextResponse.json({message : 'Chats',messages : chat.messages},{status : 200})
+        return NextResponse.json({message : 'Chats',messages : chat.messages || []},{status : 200})
     } catch (error) {
         console.log(error)
                 return NextResponse.json({error : "Internal server error"},{status : 500})

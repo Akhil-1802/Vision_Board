@@ -9,6 +9,7 @@ function CommentBox({
   setShowComments: React.Dispatch<React.SetStateAction<boolean>>,showComments: boolean, IdeaId: string,UserId:string
 }) {
   const [comments, setComments] = useState<Array<IComments>>([]);
+  const [loadComment,setLoadComment] = useState<boolean>(false)
   const [inputComment, setInputComment] = useState<string>("");
   const [showReadMore, setShowReadMore] = useState<boolean>(false);
   const handleComment = async () => {
@@ -48,6 +49,7 @@ function CommentBox({
   };
  
   useEffect(()=>{
+    setLoadComment(false)
     const getComments= async () =>{
       const res = await fetch(`/api/comments?id=${IdeaId}`)
       if(res.ok){
@@ -57,7 +59,7 @@ function CommentBox({
     }
     }
     getComments()
-  },[showComments,IdeaId])
+  },[showComments,IdeaId,loadComment])
   return (
     <div
       className={`${
@@ -100,6 +102,7 @@ function CommentBox({
         />
         <button
           onClick={() => {
+            setLoadComment(true)
             handleComment();
           }}
           className="text-sm px-4  py-1.5 rounded-sm bg-black font-semibold text-white cursor-pointer"
