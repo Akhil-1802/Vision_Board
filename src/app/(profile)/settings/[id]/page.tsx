@@ -3,7 +3,7 @@ import IconList from "../IconList";
 import ChangePassword from "./ChangePassword";
 
 const getUser = async (id: string) => {
-  const res = await fetch(`${process.env.BASE_URL!}/api/getUserDetails?id=${id}`, {
+  const res = await fetch(`https://vision-board-cyan.vercel.app/api/getUserDetails?id=${id}`, {
     cache: "no-store",
   });
   if (!res.ok) {

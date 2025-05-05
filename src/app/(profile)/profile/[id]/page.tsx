@@ -2,7 +2,7 @@ import { IUser } from "@/models/usermodel";
 import Ideas from "./Ideas";
 import Image from "next/image";
 const getUser = async (id: string) => {
-  const res = await fetch(`${process.env.BASE_URL}/api/getUserDetails?id=${id}`, {
+  const res = await fetch(`https://vision-board-cyan.vercel.app/api/getUserDetails?id=${id}`, {
     cache: "no-store", // recommended for dynamic SSR
   });
   if (!res.ok) {
