@@ -33,12 +33,12 @@ function Ideas({id} : {id : string}) {
         getIdeas()
     },[id])
   return (
-    <div className='flex flex-wrap gap-3'>
+    <div className='flex flex-wrap gap-3 max-md:flex-nowrap max-md:flex-col'>
         {
             loading && <RowOfRectangleLoaders/>
         }
         {
-            (ideas?.length === 0 && !loading) && <h1 className='text-center text-2xl'>You have not published any Idea</h1>
+            (ideas?.length === 0 && !loading) && <h1 className='text-center text-2xl py-10 px-10'>You have not published any Idea</h1>
         }
         {
             ideas?.map((idea:IdeaI) =>(

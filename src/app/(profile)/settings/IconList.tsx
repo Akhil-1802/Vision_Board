@@ -140,7 +140,7 @@ function IconList({ user }: { user: IUser }) {
         </div>
         {IconDetails.map((icon: { url: string }, index: number) =>
           icon.url !== user.image ? (
-            <div key={icon.url} id={`image-box${index}`} className="relative">
+            <div key={icon.url + Math.random()} id={`image-box${index}`} className="relative">
               <Image
               width={80}
               height={80}

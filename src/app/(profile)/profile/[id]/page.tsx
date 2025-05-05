@@ -2,7 +2,7 @@ import { IUser } from "@/models/usermodel";
 import Ideas from "./Ideas";
 import Image from "next/image";
 const getUser = async (id: string) => {
-  const res = await fetch(`http://localhost:3000/api/getUserDetails?id=${id}`, {
+  const res = await fetch(`${process.env.BASE_URL}/api/getUserDetails?id=${id}`, {
     cache: "no-store", // recommended for dynamic SSR
   });
   if (!res.ok) {
@@ -21,7 +21,7 @@ export default async function Profile({
   const user: IUser = await getUser(id);
 
   return (
-    <div className="flex my-10 container mx-auto gap-6">
+    <div className="flex max-md:flex-col max-md:justify-center max-md:items-center my-10 container mx-auto gap-6">
       <div className="relative mt-4">
         <div className="border-2 border-t-5 border-r-5 border-black absolute right-10 px-6 py-3 rounded-lg -top-4 z-10 bg-white text-black font-bold  w-44 text-center text-xl ">{user.username}</div>
         <div className="border-3 rounded-2xl border-b-8 border-r-6 bg-pink-600 border-black w-68 h-[350px] flex items-center justify-center flex-col gap-2 ">

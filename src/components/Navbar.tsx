@@ -49,7 +49,7 @@ export default function Navbar() {
               >
                 Sign Out
               </p>
-              <div className="dropdown">
+              <div className="dropdown mr-10">
                 <button>
                   <Image
                   width={36}
@@ -59,15 +59,15 @@ export default function Navbar() {
                     className="rounded-full bg-cover cursor-pointer"
                   />
                 </button>
-                <ul className="menu dropdown-content bg-pink-400 rounded-box z-1 w-24 p-1 shadow-sm">
+                <ul className="menu dropdown-content bg-pink-400 rounded-box z-1 w-20 p-1 shadow-sm max-md:text-sm">
                   <li>
-                    <Link className="text-[13px]" href={`/profile/${data.user.id}`}>Profile</Link>
+                    <Link className="text-[13px] px-2" href={`/profile/${data.user.id}`}>Profile</Link>
                   </li>
                   <li>
-                  <Link className="text-[13px]" href={`/message/${data.user.id}`}>Messages</Link>
+                  <Link className="text-[13px] px-2" href={`/message/${data.user.id}`}>Messages</Link>
                   </li>
                   <li>
-                  <Link className="text-[13px]" href={`/settings/${data.user.id}`}>Settings</Link>
+                  <Link className="text-[13px] px-2" href={`/settings/${data.user.id}`}>Settings</Link>
                   </li>
                 </ul>
               </div>
