@@ -8,40 +8,38 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 function DetailsComponent({ id }: { id: string }) {
-  const {data , status} = useSession()
-  const [showComments, setShowComments] = useState<boolean>(false)
+  const { data, status } = useSession();
+  const [showComments, setShowComments] = useState<boolean>(false);
   const [idea, setIdea] = useState<IdeaI>();
   const [randomIdea, setRandomIdea] = useState<IdeaI>();
-  const [isLiked, setIsLiked] = useState<boolean>(false)
-  
-  const handleClick = async () =>{
-     const res = await fetch(`/api/likes`,{
-      method : "POST",
-      headers:{"Content-Type":"application/json"},
-      body : JSON.stringify({userID :data?.user.id,IdeaID:idea?._id})
-     })
-     if(res.ok){
-      const data = await res.json()
-      if(data.liked){
-        toast.success('Liked!',{
-          style:{
-            background:'green',
-            border : 'green'
-          }
-        })
-      }
-      else{
-        toast.error('Like Removed!',{
-          style:{
-            background:'red',
-            border : 'red'
-          }
-        })
-      }
-      setIsLiked(data.liked)
-     }
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
-  }
+  const handleClick = async () => {
+    const res = await fetch(`/api/likes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userID: data?.user.id, IdeaID: idea?._id }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.liked) {
+        toast.success("Liked!", {
+          style: {
+            background: "green",
+            border: "green",
+          },
+        });
+      } else {
+        toast.error("Like Removed!", {
+          style: {
+            background: "red",
+            border: "red",
+          },
+        });
+      }
+      setIsLiked(data.liked);
+    }
+  };
   useEffect(() => {
     const getIdea = async () => {
       try {
@@ -50,21 +48,21 @@ function DetailsComponent({ id }: { id: string }) {
         if (res.ok) {
           setRandomIdea(Data.randomIdea);
           setIdea(Data.idea);
-          const liked = Data.idea.likedby.some(
-            (id: string) => id === data?.user.id
-          );
+          const liked = Array.isArray(Data.idea.likedby)
+            ? Data.idea.likedby.some((id: string) => id === data?.user.id)
+            : false;
+
           setIsLiked(liked);
         }
       } catch (error) {
         console.error("Failed to fetch idea:", error);
       }
     };
-  
+
     if (status === "authenticated") {
       getIdea();
     }
-  }, [status, data?.user.id,id]); // <-- make sure to include data?.user?.id if used
-  
+  }, [status, data?.user.id, id]); // <-- make sure to include data?.user?.id if used
 
   return (
     <>
@@ -103,7 +101,6 @@ function DetailsComponent({ id }: { id: string }) {
         <Image
           src={idea?.image || "/blackbg.webp"}
           width={730}
-          
           height={500}
           quality={100}
           className="bg-cover w-[73%] h-[500px] max-sm:h-[300px] rounded-lg max-xl:w-[86%] max-lg:w-[90%] max-md:w-[80%] ml-20 max-md:ml-0 "
@@ -145,14 +142,19 @@ function DetailsComponent({ id }: { id: string }) {
           ></div>
         </div>
         <div className="flex items-center gap-6">
-          <span onClick={()=>{handleClick()}} className="flex  items-center gap-1 cursor-pointer">
+          <span
+            onClick={() => {
+              handleClick();
+            }}
+            className="flex  items-center gap-1 cursor-pointer"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               width="18"
               height="18"
-              color={`${isLiked?`oklch(59.2% 0.249 0.584)`:`#000000`}`}
-              fill='none'
+              color={`${isLiked ? `oklch(59.2% 0.249 0.584)` : `#000000`}`}
+              fill="none"
             >
               <path
                 d="M2 12.5C2 11.3954 2.89543 10.5 4 10.5C5.65685 10.5 7 11.8431 7 13.5V17.5C7 19.1569 5.65685 20.5 4 20.5C2.89543 20.5 2 19.6046 2 18.5V12.5Z"
@@ -169,9 +171,18 @@ function DetailsComponent({ id }: { id: string }) {
                 strokeLinejoin="round"
               />
             </svg>
-            <p className={`text-sm ${isLiked?`text-pink-600 font-bold`:`text-black`}`}>Like</p>
+            <p
+              className={`text-sm ${
+                isLiked ? `text-pink-600 font-bold` : `text-black`
+              }`}
+            >
+              Like
+            </p>
           </span>
-          <span onClick={()=> setShowComments(prev => !prev)} className="flex items-center gap-1 cursor-pointer">
+          <span
+            onClick={() => setShowComments((prev) => !prev)}
+            className="flex items-center gap-1 cursor-pointer"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -194,10 +205,17 @@ function DetailsComponent({ id }: { id: string }) {
                 strokeLinejoin="round"
               ></path>
             </svg>
-          <p className="text-sm">Comment</p>
+            <p className="text-sm">Comment</p>
           </span>
         </div>
-        {showComments && <CommentBox UserId={data?.user.id ? data.user.id.toString():''} IdeaId = {idea?._id?.toString() || ""} setShowComments = {setShowComments} showComments ={showComments} />}
+        {showComments && (
+          <CommentBox
+            UserId={data?.user.id ? data.user.id.toString() : ""}
+            IdeaId={idea?._id?.toString() || ""}
+            setShowComments={setShowComments}
+            showComments={showComments}
+          />
+        )}
         <div className="h-0 my-8 border-1 border-dotted border-gray-400 w-full"></div>
         <div>
           <h1 className="text-2xl font-bold mb-6">Similar Ideas</h1>
